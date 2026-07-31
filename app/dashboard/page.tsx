@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { safeGetServerSession, type SessionWithToken } from "@/lib/auth";
 import { fetchUserGuilds, guildIconUrl } from "@/lib/discord";
@@ -57,6 +58,12 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/dashboard/${guild.id}`}
+                      className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+                    >
+                      ⚙️ Ustawienia bota
+                    </Link>
                     <a
                       href={invite}
                       target="_blank"

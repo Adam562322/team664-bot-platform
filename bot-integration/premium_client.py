@@ -6,7 +6,7 @@ import os
 import time
 import aiohttp
 
-PREMIUM_API_URL = os.getenv("PREMIUM_API_URL", "https://twoja-domena.pl/api/premium")
+PREMIUM_API_URL = os.getenv("PREMIUM_API_URL", "https://team664-bot-platform.vercel.app/api/premium")
 PREMIUM_API_SECRET = os.getenv("BOT_PREMIUM_API_SECRET", "")
 
 # guild_id -> {"plan": str, "features": dict, "fetched_at": float}

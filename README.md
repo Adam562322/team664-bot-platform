@@ -26,7 +26,7 @@ Otwórz http://localhost:3000
 2. **New Application** → nazwa np. „TEAM-664 Bot”
 3. **Bot** → Reset Token → wklej jako `DISCORD_BOT_TOKEN` (na hosting bota, nie na stronę)
 4. **OAuth2 → General**:
-   - Redirect: `http://localhost:3000/api/auth/callback/discord` (prod: `https://twoja-domena.pl/api/auth/callback/discord`)
+   - Redirect: `http://localhost:3000/api/auth/callback/discord` (prod: `https://team664-bot-platform.vercel.app/api/auth/callback/discord`)
    - Skopiuj Client ID i Client Secret → `.env.local`
 5. Włącz **Public Bot** (Bot → Public Bot), żeby każdy mógł zaprosić bota
 6. Link zaproszenia generuje strona automatycznie (`Dodaj do Discord`)
@@ -36,7 +36,7 @@ Otwórz http://localhost:3000
 1. Konto na https://stripe.com
 2. **Products** → utwórz „Pro” i „Premium” (subskrypcja miesięczna, PLN)
 3. Skopiuj **Price ID** → `STRIPE_PRICE_PRO`, `STRIPE_PRICE_PREMIUM`
-4. **Developers → Webhooks** → endpoint: `https://twoja-domena.pl/api/stripe/webhook`
+4. **Developers → Webhooks** → endpoint: `https://team664-bot-platform.vercel.app/api/stripe/webhook`
    - Zdarzenia: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
 5. Webhook secret → `STRIPE_WEBHOOK_SECRET`
 
