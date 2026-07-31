@@ -17,27 +17,47 @@ type Store = {
   subscriptions: Record<string, SubscriptionRecord>;
 };
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const STORE_PATH = path.join(DATA_DIR, "subscriptions.json");
+function getDataDir(): string {
+  if (process.env.VERCEL) {
+    return path.join("/tmp", "team664-bot-platform");
+  }
+  return path.join(process.cwd(), "data");
+}
+
+function getStorePath(): string {
+  return path.join(getDataDir(), "subscriptions.json");
+}
 
 function ensureStore(): Store {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  const dataDir = getDataDir();
+  const storePath = getStorePath();
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    if (!fs.existsSync(storePath)) {
+      const empty: Store = { subscriptions: {} };
+      fs.writeFileSync(storePath, JSON.stringify(empty, null, 2), "utf-8");
+      return empty;
+    }
+    const raw = fs.readFileSync(storePath, "utf-8");
+    return JSON.parse(raw) as Store;
+  } catch {
+    return { subscriptions: {} };
   }
-  if (!fs.existsSync(STORE_PATH)) {
-    const empty: Store = { subscriptions: {} };
-    fs.writeFileSync(STORE_PATH, JSON.stringify(empty, null, 2), "utf-8");
-    return empty;
-  }
-  const raw = fs.readFileSync(STORE_PATH, "utf-8");
-  return JSON.parse(raw) as Store;
 }
 
 function saveStore(store: Store) {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  const dataDir = getDataDir();
+  const storePath = getStorePath();
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    fs.writeFileSync(storePath, JSON.stringify(store, null, 2), "utf-8");
+  } catch {
+    // Vercel — brak zapisu; plany wrócą do free po restarcie (OK na start)
   }
-  fs.writeFileSync(STORE_PATH, JSON.stringify(store, null, 2), "utf-8");
 }
 
 export function getSubscription(guildId: string): SubscriptionRecord {

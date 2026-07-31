@@ -11,9 +11,15 @@ const FEATURES = [
   { icon: "🔔", title: "Poczekalnia", desc: "Powiadomienie adminów i przenoszenie z poczekalni voice." },
 ];
 
+const DISCORD_CLIENT_ID =
+  process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID ??
+  process.env.DISCORD_CLIENT_ID ??
+  "1437907745704644829";
+
+export const dynamic = "force-static";
+
 export default function HomePage() {
-  const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID ?? process.env.DISCORD_CLIENT_ID ?? "";
-  const invite = clientId ? botInviteUrl(clientId) : "#";
+  const invite = botInviteUrl(DISCORD_CLIENT_ID);
 
   return (
     <>
@@ -41,7 +47,7 @@ export default function HomePage() {
               Dodaj do Discord
             </a>
             <Link
-              href="/dashboard"
+              href="/login"
               className="rounded-xl border border-slate-700 px-8 py-3 font-semibold hover:bg-slate-900"
             >
               Panel właściciela

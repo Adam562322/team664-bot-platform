@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { safeGetServerSession } from "@/lib/auth";
 import { getStripe, stripePriceIdForPlan } from "@/lib/stripe";
 import type { PlanId } from "@/lib/plans";
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession();
   if (!session) {
     return NextResponse.redirect(new URL("/api/auth/signin", req.url));
   }

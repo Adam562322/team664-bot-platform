@@ -6,6 +6,8 @@ function unauthorized() {
   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
+export const runtime = "nodejs";
+
 export async function GET(req: NextRequest) {
   const secret = req.headers.get("x-api-secret") ?? req.nextUrl.searchParams.get("secret");
   const expected = process.env.BOT_PREMIUM_API_SECRET;

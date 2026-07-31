@@ -4,6 +4,8 @@ import { upsertSubscription } from "@/lib/db";
 import { getStripe, planFromStripePrice } from "@/lib/stripe";
 import type { PlanId } from "@/lib/plans";
 
+export const runtime = "nodejs";
+
 export async function POST(req: NextRequest) {
   const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;

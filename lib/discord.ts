@@ -15,9 +15,10 @@ export async function fetchUserGuilds(accessToken: string): Promise<DiscordGuild
   if (!res.ok) return [];
   const guilds = (await res.json()) as DiscordGuild[];
   // MANAGE_GUILD (0x20) — tylko serwery, którymi user zarządza
+  const manageGuild = BigInt(0x20);
   return guilds.filter((g) => {
     const perms = BigInt(g.permissions);
-    return g.owner || (perms & 0x20n) === 0x20n;
+    return g.owner || (perms & manageGuild) === manageGuild;
   });
 }
 

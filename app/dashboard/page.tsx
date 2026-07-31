@@ -1,14 +1,15 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions, type SessionWithToken } from "@/lib/auth";
+import { safeGetServerSession, type SessionWithToken } from "@/lib/auth";
 import { fetchUserGuilds, guildIconUrl } from "@/lib/discord";
 import { getSubscription } from "@/lib/db";
-import { botInviteUrl, PLANS } from "@/lib/plans";
+import { botInviteUrl, PLANS, planRank } from "@/lib/plans";
 import { PricingCard } from "@/components/PricingCard";
 
+export const runtime = "nodejs";
+
 export default async function DashboardPage() {
-  const session = (await getServerSession(authOptions)) as SessionWithToken | null;
-  if (!session?.accessToken) redirect("/api/auth/signin");
+  const session = await safeGetServerSession();
+  if (!session?.accessToken) redirect("/login");
 
   const guilds = await fetchUserGuilds(session.accessToken);
   const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID ?? process.env.DISCORD_CLIENT_ID ?? "";
@@ -85,6 +86,3 @@ export default async function DashboardPage() {
   );
 }
 
-function planRank(id: string) {
-  return { free: 0, pro: 1, premium: 2 }[id as "free" | "pro" | "premium"] ?? 0;
-}
