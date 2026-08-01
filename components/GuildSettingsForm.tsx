@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import type { GuildBotConfig } from "@/lib/guild-config";
 
-type DiscordMeta = {
+export type DiscordMeta = {
   roles: { id: string; name: string }[];
   channels: { id: string; name: string; type: number }[];
   botTokenConfigured: boolean;
@@ -42,33 +42,38 @@ const inputClass =
 export function GuildSettingsForm({
   guildId,
   guildName,
+  initialConfig,
+  initialMeta,
 }: {
   guildId: string;
   guildName: string;
+  initialConfig: GuildBotConfig;
+  initialMeta: DiscordMeta;
 }) {
   const [tab, setTab] = useState<TabId>("verification");
-  const [config, setConfig] = useState<GuildBotConfig | null>(null);
-  const [meta, setMeta] = useState<DiscordMeta | null>(null);
+  const [config, setConfig] = useState<GuildBotConfig>(initialConfig);
+  const [meta, setMeta] = useState<DiscordMeta>(initialMeta);
   const [status, setStatus] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const [metaLoading, setMetaLoading] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    const [cfgRes, metaRes] = await Promise.all([
-      fetch(`/api/guilds/${guildId}/config`),
-      fetch(`/api/guilds/${guildId}/discord-meta`),
-    ]);
-    if (cfgRes.ok) setConfig(await cfgRes.json());
-    if (metaRes.ok) setMeta(await metaRes.json());
-    setLoading(false);
-  }, [guildId]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  async function refreshMeta() {
+    setMetaLoading(true);
+    try {
+      const res = await fetch(`/api/guilds/${guildId}/discord-meta`);
+      if (res.ok) {
+        setMeta(await res.json());
+        setStatus("✅ Odświeżono listę kanałów i ról.");
+      } else {
+        setStatus("❌ Nie udało się pobrać kanałów i ról z Discorda.");
+      }
+    } catch {
+      setStatus("❌ Błąd połączenia z Discordem.");
+    } finally {
+      setMetaLoading(false);
+    }
+  }
 
   async function save() {
-    if (!config) return;
     setStatus("Zapisywanie…");
     const res = await fetch(`/api/guilds/${guildId}/config`, {
       method: "PATCH",
@@ -83,14 +88,10 @@ export function GuildSettingsForm({
     }
   }
 
-  if (loading || !config) {
-    return <p className="text-slate-400">Ładowanie ustawień…</p>;
-  }
-
-  const textChannels =
-    meta?.channels.filter((c) => c.type === 0 || c.type === 5) ?? [];
-  const voiceChannels = meta?.channels.filter((c) => c.type === 2 || c.type === 13) ?? [];
-  const roles = meta?.roles ?? [];
+  const textChannels = meta.channels.filter((c) => c.type === 0 || c.type === 5);
+  const voiceChannels = meta.channels.filter((c) => c.type === 2 || c.type === 13);
+  const roles = meta.roles;
+  const hasDiscordLists = roles.length > 0 || meta.channels.length > 0;
 
   return (
     <div className="space-y-6">
@@ -102,10 +103,27 @@ export function GuildSettingsForm({
         </p>
       </div>
 
-      {!meta?.botTokenConfigured && (
+      {!meta.botTokenConfigured && (
         <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-100">
           Dodaj <code className="text-amber-200">DISCORD_BOT_TOKEN</code> w Vercel, żeby wczytywać
           listę kanałów i ról (bot musi być na serwerze).
+        </div>
+      )}
+
+      {meta.botTokenConfigured && !hasDiscordLists && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-100">
+          <p>
+            Token bota jest ustawiony, ale Discord nie zwrócił kanałów ani ról. Sprawdź, czy bot{" "}
+            <strong>Team-664</strong> jest na tym serwerze i ma uprawnienia do odczytu kanałów.
+          </p>
+          <button
+            type="button"
+            onClick={refreshMeta}
+            disabled={metaLoading}
+            className="mt-3 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
+          >
+            {metaLoading ? "Odświeżanie…" : "Odśwież listę kanałów i ról"}
+          </button>
         </div>
       )}
 
@@ -557,6 +575,16 @@ export function GuildSettingsForm({
         >
           Zapisz ustawienia
         </button>
+        {hasDiscordLists && (
+          <button
+            type="button"
+            onClick={refreshMeta}
+            disabled={metaLoading}
+            className="w-full rounded-xl border border-slate-700 py-3 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-50 sm:w-auto sm:px-6"
+          >
+            {metaLoading ? "Odświeżanie…" : "Odśwież kanały"}
+          </button>
+        )}
         {status && <p className="text-sm text-slate-400">{status}</p>}
       </div>
     </div>
